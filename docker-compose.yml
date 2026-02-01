@@ -1,7 +1,5 @@
 version: '3.8'
-
 services:
-  # ─── APLICAÇÃO PHP (MapOS) ────────────────────────────────────────
   mapos-app:
     build:
       context: .
@@ -20,15 +18,14 @@ services:
       - mapos_anexos:/var/www/html/assets/anexos
       - mapos_userimage:/var/www/html/assets/userimage
     ports:
-      - "8000:80"
+      - "5587:5587"  # Mudamos aqui
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost/"]
+      test: ["CMD", "curl", "-f", "http://localhost:5587/"] # Mudamos aqui também
       interval: 30s
       timeout: 10s
       retries: 3
 
-  # ─── BANCO DE DADOS MySQL ─────────────────────────────────────────
   mysql:
     image: mysql:8.0
     environment:
@@ -36,21 +33,18 @@ services:
       - MYSQL_USER=mapos
       - MYSQL_PASSWORD=${MAPOS_DB_PASSWORD}
       - MYSQL_DATABASE=mapos
-      - MYSQL_CHARSET=utf8mb4
-      - MYSQL_COLLATION=utf8mb4_unicode_ci
     volumes:
       - mapos_mysqldata:/var/lib/mysql
     ports:
       - "3306:3306"
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "mapos", "-p${MAPOS_DB_PASSWORD}"]
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "mapos", "-p$${MAPOS_DB_PASSWORD}"]
       interval: 10s
       timeout: 5s
       retries: 5
       start_period: 30s
 
-  # ─── PhpMyAdmin (opcional, para gerenciar o BD visualmente) ──────
   phpmyadmin:
     image: phpmyadmin/phpmyadmin
     environment:
@@ -65,7 +59,6 @@ services:
       - "8080:80"
     restart: unless-stopped
 
-# ─── VOLUMES PERSISTENTES ────────────────────────────────────────────
 volumes:
   mapos_mysqldata:
   mapos_uploads:
