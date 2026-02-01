@@ -1,0 +1,74 @@
+version: '3.8'
+
+services:
+  # ─── APLICAÇÃO PHP (MapOS) ────────────────────────────────────────
+  mapos-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    depends_on:
+      mysql:
+        condition: service_healthy
+    environment:
+      - DB_HOST=mysql
+      - DB_USER=mapos
+      - DB_PASS=${MAPOS_DB_PASSWORD}
+      - DB_NAME=mapos
+    volumes:
+      - mapos_uploads:/var/www/html/assets/uploads
+      - mapos_arquivos:/var/www/html/assets/arquivos
+      - mapos_anexos:/var/www/html/assets/anexos
+      - mapos_userimage:/var/www/html/assets/userimage
+    ports:
+      - "8000:80"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # ─── BANCO DE DADOS MySQL ─────────────────────────────────────────
+  mysql:
+    image: mysql:8.0
+    environment:
+      - MYSQL_ROOT_PASSWORD=${MAPOS_DB_ROOT_PASSWORD}
+      - MYSQL_USER=mapos
+      - MYSQL_PASSWORD=${MAPOS_DB_PASSWORD}
+      - MYSQL_DATABASE=mapos
+      - MYSQL_CHARSET=utf8mb4
+      - MYSQL_COLLATION=utf8mb4_unicode_ci
+    volumes:
+      - mapos_mysqldata:/var/lib/mysql
+    ports:
+      - "3306:3306"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "mapos", "-p${MAPOS_DB_PASSWORD}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  # ─── PhpMyAdmin (opcional, para gerenciar o BD visualmente) ──────
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    environment:
+      - PMA_HOST=mysql
+      - PMA_PORT=3306
+      - PMA_USER=mapos
+      - PMA_PASSWORD=${MAPOS_DB_PASSWORD}
+    depends_on:
+      mysql:
+        condition: service_healthy
+    ports:
+      - "8080:80"
+    restart: unless-stopped
+
+# ─── VOLUMES PERSISTENTES ────────────────────────────────────────────
+volumes:
+  mapos_mysqldata:
+  mapos_uploads:
+  mapos_arquivos:
+  mapos_anexos:
+  mapos_userimage:
