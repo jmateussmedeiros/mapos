@@ -37,4 +37,4 @@ COPY . .
 RUN composer install --no-dev --optimize-autoloader
 RUN chown -R www-data:www-data /var/www/html && \
     chmod -R 775 /var/www/html/assets
-EXPOSE 80
+EXPOSE 5587
