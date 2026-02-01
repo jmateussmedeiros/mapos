@@ -28,7 +28,9 @@ RUN docker-php-install-script && \
         exif
 
 # ─── Instalar Composer ────────────────────────────────────────────
-COPY --from=composer:latest /usr/local/bin/composer /usr/local/bin/composer
+RUN php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');" && \
+    php composer-setup.php --install-dir=/usr/local/bin --filename=composer && \
+    php -r "unlink('composer-setup.php');"
 
 # ─── Habilitar mod_rewrite no Apache ─────────────────────────────
 RUN a2enmod rewrite
