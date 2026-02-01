@@ -9,6 +9,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libfreetype6-dev \
     libxml2-dev \
     libzip-dev \
+    libicu-dev \
     mariadb-client \
     && rm -rf /var/lib/apt/lists/*
 
