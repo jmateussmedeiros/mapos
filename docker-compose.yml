@@ -18,7 +18,7 @@ services:
       - mapos_anexos:/var/www/html/assets/anexos
       - mapos_userimage:/var/www/html/assets/userimage
     ports:
-      - "5587:5587"  # Mudamos aqui
+      - "8000:80"  # Mudamos aqui
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:5587/"] # Mudamos aqui também
