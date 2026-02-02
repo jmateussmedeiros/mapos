@@ -1,6 +1,5 @@
 FROM php:8.4-apache
 
-# Adicionado libonig-dev à lista de dependências
 RUN apt-get update && apt-get install -y --no-install-recommends \
     curl \
     zip \
@@ -27,14 +26,23 @@ RUN docker-php-ext-configure gd --with-freetype --with-jpeg && \
         mbstring \
         exif
 
-RUN php -r "copy('https://getcomposer.org/installer', 'composer-setup.php' );" && \
+RUN php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');" && \
     php composer-setup.php --install-dir=/usr/local/bin --filename=composer && \
     php -r "unlink('composer-setup.php');"
 
 RUN a2enmod rewrite
+
 WORKDIR /var/www/html
 COPY . .
+
 RUN composer install --no-dev --optimize-autoloader
-RUN chown -R www-data:www-data /var/www/html && \
+
+# Cria os diretórios de upload se não existirem e ajusta permissões
+RUN mkdir -p /var/www/html/assets/uploads \
+             /var/www/html/assets/arquivos \
+             /var/www/html/assets/anexos \
+             /var/www/html/assets/userimage && \
+    chown -R www-data:www-data /var/www/html && \
     chmod -R 775 /var/www/html/assets
+
 EXPOSE 80
